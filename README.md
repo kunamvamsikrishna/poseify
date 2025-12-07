@@ -1149,6 +1149,223 @@ Error: Invalid Cloudinary credentials
 
 ---
 
+## 📸 API Response Screenshots
+
+### 1. User Authentication
+
+#### GET `/api/users/` - Get All Users
+![Get All Users](screenshots/get-all-users.png)
+
+**Description**: Retrieves list of all registered users with pagination support.
+
+**Response**: 
+- Shows user details including username, email, first_name, last_name
+- Includes user status (is_active) and last login timestamp
+- Example users: "Doe", "testuser", "admin"
+
+---
+
+#### POST `/api/poses/extract-pose` - Extract Pose from Image
+![Extract Pose](screenshots/extract-pose.png)
+
+**Description**: Uploads an image and extracts 33 pose landmarks using MediaPipe.
+
+**Response**:
+- `image_id`: MongoDB reference
+- `sql_record_id`: PostgreSQL reference
+- `filename`: Original image name
+- `image_url`: Cloudinary hosted URL
+- `cloudinary_public_id`: Cloud storage identifier
+- `num_landmarks`: 33 body keypoints detected
+- `image_dimensions`: Width and height
+- `landmarks`: Array of all detected keypoints with name, x, y, z coordinates and visibility score
+
+**Key Landmarks**:
+- nose, left_eye_inner, left_eye, right_eye_inner, right_eye
+- left_shoulder, right_shoulder, left_elbow, right_elbow
+- left_wrist, right_wrist, left_hip, right_hip
+- And 21 more keypoints for complete body tracking
+
+---
+
+#### GET `/api/poses` - Get All Poses
+![Get All Poses](screenshots/get-all-poses.png)
+
+**Description**: Retrieves all detected poses with pagination.
+
+**Response**:
+- Complete pose data with all 33 landmark coordinates
+- Each pose includes image reference and user association
+- Raw coordinate data (nose_x, nose_y, nose_z, visibility scores)
+- Linked to specific image_id in MongoDB
+
+---
+
+#### GET `/api/users/me/images` - Get User's Images
+![Get User Images](screenshots/get-user-images.png)
+
+**Description**: Retrieves all images uploaded by the authenticated user.
+
+**Response**:
+- `images`: Array of image objects
+- Each image includes:
+  - MongoDB `_id`
+  - `filename` and `original_name`
+  - `file_path`: Local upload path
+  - `image_url`: Cloudinary CDN URL
+  - `cloudinary_public_id`: Cloud identifier
+  - `file_size`: Image size in bytes
+  - `mime_type`: Image format (e.g., image/jpeg)
+  - `width` and `height`: Image dimensions
+  - `user_id`: Owner reference
+  - `status`: Processing status
+  - `pose_extracted`: Boolean flag
+  - `sql_record_id`: PostgreSQL reference
+  - Timestamps: `createdAt` and `updatedAt`
+- `pagination`: Current page and total counts
+
+---
+
+### 2. Backup System
+
+#### POST `/api/backup/create?sendEmail=true` - Create Backup with Email
+![Create Backup with Email](screenshots/create-backup-email.png)
+
+**Description**: Manually triggers a database backup and sends email notification.
+
+**Response**:
+- `success`: true
+- `message`: "Backup created successfully"
+- `data`:
+  - `filename`: Timestamped backup file (e.g., 2025-12-07-backup.zip)
+  - `path`: Full file system path
+  - `duration`: Time taken to create backup
+  - `alreadyExists`: false (new backup created)
+  - `emailSent`: true
+  - `emailRecipient`: Admin email address
+
+**Email Notification**:
+- Subject: "✅ Database Backup Completed"
+- Contains backup details (filename, size, date, time)
+- Includes ZIP file as attachment
+- Sent to configured admin email
+
+---
+
+### 3. Database Backup Contents
+
+#### PostgreSQL Export - Users Table
+![PostgreSQL Backup](screenshots/postgres-backup.png)
+
+**Description**: Exported PostgreSQL data showing users and pose_data tables.
+
+**Contents**:
+- `exportDate`: Timestamp of backup
+- `database`: "poseify"
+- `tables`:
+  - **users**: Complete user records with encrypted passwords
+    - id, username, email, first_name, last_name
+    - is_active status
+    - last_login timestamp
+    - created_at and updated_at
+  - **pose_data**: Pose landmark records (count: 1)
+    - All 33 landmark coordinates (x, y, z, visibility)
+    - Linked to image_id and user_id
+
+---
+
+#### MongoDB Export - Images Collection
+![MongoDB Backup](screenshots/mongodb-backup-images.png)
+
+**Description**: Exported MongoDB images collection.
+
+**Contents**:
+- Image metadata with Cloudinary integration
+- Fields:
+  - `_id`: MongoDB ObjectId
+  - `filename`: Stored filename
+  - `original_name`: Original upload name
+  - `file_path`: Local storage path
+  - `image_url`: Cloudinary CDN URL
+  - `cloudinary_public_id`: Cloud storage ID
+  - `file_size`: 7485 bytes
+  - `mime_type`: "image/jpeg"
+  - `width` and `height`: 225x225
+  - `user_id`: 5 (owner reference)
+  - `status`: "processed"
+  - `pose_extracted`: true
+  - `sql_record_id`: 8 (PostgreSQL reference)
+
+---
+
+#### MongoDB Export - Summary
+![MongoDB Summary](screenshots/mongodb-backup-summary.png)
+
+**Description**: Backup summary showing database structure.
+
+**Contents**:
+- `exportDate`: "2025-12-07T07:55:00.103Z"
+- `database`: "MongoDB"
+- `note`: "Images are stored in MongoDB, pose landmarks are stored in PostgreSQL"
+- `collections`:
+  - **images**: 
+    - `count`: 1
+    - `description`: "Image metadata including Cloudinary URLs and user associations"
+
+This shows the dual-database architecture where MongoDB stores image metadata and PostgreSQL stores pose landmark coordinates.
+
+---
+
+### 4. Email Notification Preview
+
+#### Brevo Email - Backup Completed
+![Backup Email Notification](screenshots/email-notification.png)
+
+**Description**: Automated email sent via Brevo service after successful backup.
+
+**Email Details**:
+- **Subject**: ✅ Database Backup Completed
+- **Message**: "Your daily database backup has been completed successfully."
+- **Backup Details**:
+  - 📋 Filename: 2025-12-07-backup.zip
+  - 💾 Size: 0.01 MB
+  - 📅 Date: 2025-12-07
+  - 🕐 Time: 12/7/2025, 12:40:43 PM
+- **Attachment**: ZIP file containing PostgreSQL and MongoDB exports
+- **From**: vk5884074@gmail.com
+- **To**: vamsi989596@gmail.com
+
+---
+
+## 🎯 Key Features Demonstrated
+
+### ✅ Complete CRUD Operations
+- User registration and authentication
+- Image upload and management
+- Pose detection and retrieval
+- Backup creation and management
+
+### ✅ Dual Database Architecture
+- **PostgreSQL**: Structured pose landmark data (33 coordinates per pose)
+- **MongoDB**: Flexible image metadata with Cloudinary integration
+
+### ✅ Cloud Integration
+- **Cloudinary**: Image hosting with CDN
+- **Brevo**: Reliable email notifications
+
+### ✅ Automated Workflows
+- Daily backups at 11:59 PM
+- Email notifications with attachments
+- Automatic cleanup of old backups (keeps last 30)
+
+### ✅ Security & Authentication
+- JWT tokens with 7-day expiration
+- bcrypt password hashing
+- Protected API endpoints
+- User ownership validation
+
+---
+
 ## 🤝 Contributing
 
 1. Fork the repository
