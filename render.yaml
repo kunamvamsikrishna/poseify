@@ -8,14 +8,13 @@ services:
     databaseName: poseify
     databaseUser: poseify_user
 
-  # Web Service (Node.js + Python)
+  # Web Service (Docker with Node.js + Python + MediaPipe)
   - type: web
     name: poseify-api
-    env: node
+    env: docker
     region: oregon
     plan: free
-    buildCommand: "cd backend && npm install && cd ../python && pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt"
-    startCommand: "cd backend && node server.js"
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: NODE_ENV
         value: production
@@ -26,5 +25,5 @@ services:
           name: poseify-postgres
           property: connectionString
       - key: PYTHON_PATH
-        value: /opt/render/project/src/python/venv/bin/python
+        value: /usr/bin/python3
     healthCheckPath: /api

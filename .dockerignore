@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+.env
+.DS_Store
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/backups/*
+!backend/backups/.gitkeep
+python/venv
+python/__pycache__
+*.pyc
+.git
+.gitignore
+README.md
+screenshots

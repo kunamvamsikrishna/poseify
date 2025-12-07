@@ -1,14 +1,10 @@
 # Python Requirements for POSEIFY Pose Extraction
-# Note: MediaPipe is not compatible with Render's environment
-# For production deployment, consider using TensorFlow Lite or ONNX Runtime
 
-# Computer Vision
+# Computer Vision and ML
 opencv-python-headless==4.10.0.84
+mediapipe==0.10.14
 numpy==1.26.4
-
-# Alternative: Use these for local development only
-# mediapipe==0.10.14
-# protobuf==3.20.3
+protobuf==3.20.3
 
 # Optional: For advanced processing
 # pillow>=10.0.0

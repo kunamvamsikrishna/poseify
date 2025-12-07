@@ -1366,61 +1366,106 @@ This shows the dual-database architecture where MongoDB stores image metadata an
 
 ---
 
-## 🚀 Deployment to Render
+## 🚀 Deployment to Render (with Docker)
 
-### Quick Setup (5 minutes)
+### Quick Setup - Docker Deployment (10 minutes)
+
+This project uses **Docker** to ensure MediaPipe works properly on Render!
 
 #### 1. Create PostgreSQL Database
 1. Go to [Render Dashboard](https://dashboard.render.com)
 2. Click **New +** → **PostgreSQL**
-3. Name: `poseify-postgres`, Plan: **Free**
-4. Copy the **Internal Database URL**
+3. Configure:
+   - **Name**: `poseify-postgres`
+   - **Database**: `poseify`
+   - **Region**: Choose closest to you
+   - **Plan**: **Free**
+4. Click **Create Database**
+5. Copy the **Internal Database URL** from Info tab
 
-#### 2. Deploy Web Service
+#### 2. Deploy Web Service (Docker)
 1. Click **New +** → **Web Service**
-2. Connect GitHub: `your-username/poseify`
+2. Connect GitHub repository: `your-username/poseify`
 3. Configure:
    - **Name**: `poseify-api`
-   - **Runtime**: `Node`
-   - **Build Command**: 
-     ```bash
-     cd backend && npm install && cd ../python && pip install --no-cache-dir -r requirements.txt
-     ```
-   - **Start Command**: 
-     ```bash
-     cd backend && node server.js
-     ```
+   - **Region**: Same as database
+   - **Environment**: **Docker** ⭐ (Important!)
+   - **Branch**: `main`
+   - **Dockerfile Path**: `./Dockerfile`
+   - **Plan**: **Free**
 
-#### 3. Environment Variables
-Add these in Render's Environment tab:
+#### 3. Add Environment Variables
+Click **Environment** tab and add:
+
 ```env
 NODE_ENV=production
 PORT=10000
-DATABASE_URL=<paste-postgres-internal-url>
-MONGO_URI=<your-mongodb-atlas-uri>
-JWT_SECRET=<your-jwt-secret>
-CLOUDINARY_CLOUD_NAME=<your-cloudinary-name>
-CLOUDINARY_API_KEY=<your-cloudinary-key>
-CLOUDINARY_API_SECRET=<your-cloudinary-secret>
-BREVO_API_KEY=<your-brevo-key>
-BREVO_FROM_EMAIL=<your-email>
+DATABASE_URL=<paste-internal-database-url-from-step-1>
+MONGO_URI=<your-mongodb-atlas-connection-string>
+JWT_SECRET=<your-jwt-secret-key>
+CLOUDINARY_CLOUD_NAME=<your-cloudinary-cloud-name>
+CLOUDINARY_API_KEY=<your-cloudinary-api-key>
+CLOUDINARY_API_SECRET=<your-cloudinary-api-secret>
+BREVO_API_KEY=<your-brevo-api-key>
+BREVO_FROM_EMAIL=<your-verified-email>
+BREVO_FROM_NAME=POSEIFY Backup System
 ADMIN_EMAIL=<your-admin-email>
+PYTHON_PATH=/usr/bin/python3
 ```
 
-### ⚠️ Important Note About MediaPipe
+#### 4. Deploy!
+1. Click **Create Web Service**
+2. Render will:
+   - Build Docker image with Node.js + Python 3.11
+   - Install MediaPipe and all dependencies
+   - Start your server
+3. Deployment takes ~10-15 minutes (first time)
+4. Monitor logs for any errors
 
-**MediaPipe is NOT compatible with Render's free tier environment.** 
+### ✅ What's Included in Docker Image:
+- ✅ Node.js 18 (for Express server)
+- ✅ Python 3.11 (for MediaPipe)
+- ✅ MediaPipe with all system dependencies
+- ✅ OpenCV (headless version for servers)
+- ✅ All required libraries (libGL, libGLib, etc.)
 
-For production deployment on Render, you have these options:
+### 🎯 All Features Working:
+- ✅ User authentication (JWT)
+- ✅ **Pose detection with MediaPipe** ⭐
+- ✅ Image upload to Cloudinary
+- ✅ Database operations (PostgreSQL + MongoDB)
+- ✅ Automated daily backups
+- ✅ Email notifications
+- ✅ Complete API endpoints (20 total)
 
-1. **Remove pose detection temporarily** - Deploy without MediaPipe, add it later
-2. **Use alternative platforms**:
-   - **Railway** (supports Python binary dependencies)
-   - **Google Cloud Run** (supports Docker with MediaPipe)
-   - **AWS EC2** (full control over environment)
-3. **Use TensorFlow Lite or ONNX Runtime** - Lighter alternatives to MediaPipe
+### 📝 Testing Your Deployment:
 
-**For now**: The app will deploy successfully but pose extraction endpoint will fail. All other features (user auth, images, backups, email) work perfectly!
+Once deployed, your API will be at: `https://poseify-api.onrender.com`
+
+Test endpoints:
+```bash
+# Health check
+GET https://poseify-api.onrender.com/health
+
+# API info
+GET https://poseify-api.onrender.com/api
+
+# Register user
+POST https://poseify-api.onrender.com/api/users/register
+
+# Extract pose (with MediaPipe!)
+POST https://poseify-api.onrender.com/api/poses/extract-pose
+```
+
+### ⚠️ Free Tier Limitations:
+- Service sleeps after 15 minutes of inactivity
+- First request after sleep takes 30-60 seconds (cold start)
+- 750 hours/month free
+- PostgreSQL: 1GB storage, expires after 90 days
+
+### 💰 Upgrade Options:
+- **Starter Plan** ($7/month): Always-on, no cold starts
+- Better for production use
 
 ---
 
