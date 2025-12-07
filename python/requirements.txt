@@ -4,8 +4,8 @@
 setuptools>=65.0.0
 
 # Computer Vision and ML
-opencv-python>=4.8.0
-mediapipe==0.10.9
+opencv-python-headless>=4.8.0
+mediapipe
 numpy>=1.24.0,<2.0.0
 
 # Optional: For advanced processing

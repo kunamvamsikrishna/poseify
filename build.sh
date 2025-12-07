@@ -6,8 +6,11 @@ echo "Installing Node.js dependencies..."
 cd backend
 npm install
 
-echo "Installing Python dependencies..."
+echo "Upgrading pip..."
 cd ../python
-pip install -r requirements.txt
+pip install --upgrade pip
+
+echo "Installing Python dependencies..."
+pip install --no-cache-dir -r requirements.txt
 
 echo "Build completed successfully!"

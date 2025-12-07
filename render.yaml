@@ -14,7 +14,7 @@ services:
     env: node
     region: oregon
     plan: free
-    buildCommand: "cd backend && npm install && cd ../python && pip install -r requirements.txt"
+    buildCommand: "cd backend && npm install && cd ../python && pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt"
     startCommand: "cd backend && node server.js"
     envVars:
       - key: NODE_ENV
