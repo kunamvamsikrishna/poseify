@@ -1366,6 +1366,64 @@ This shows the dual-database architecture where MongoDB stores image metadata an
 
 ---
 
+## 🚀 Deployment to Render
+
+### Quick Setup (5 minutes)
+
+#### 1. Create PostgreSQL Database
+1. Go to [Render Dashboard](https://dashboard.render.com)
+2. Click **New +** → **PostgreSQL**
+3. Name: `poseify-postgres`, Plan: **Free**
+4. Copy the **Internal Database URL**
+
+#### 2. Deploy Web Service
+1. Click **New +** → **Web Service**
+2. Connect GitHub: `your-username/poseify`
+3. Configure:
+   - **Name**: `poseify-api`
+   - **Runtime**: `Node`
+   - **Build Command**: 
+     ```bash
+     cd backend && npm install && cd ../python && pip install --no-cache-dir -r requirements.txt
+     ```
+   - **Start Command**: 
+     ```bash
+     cd backend && node server.js
+     ```
+
+#### 3. Environment Variables
+Add these in Render's Environment tab:
+```env
+NODE_ENV=production
+PORT=10000
+DATABASE_URL=<paste-postgres-internal-url>
+MONGO_URI=<your-mongodb-atlas-uri>
+JWT_SECRET=<your-jwt-secret>
+CLOUDINARY_CLOUD_NAME=<your-cloudinary-name>
+CLOUDINARY_API_KEY=<your-cloudinary-key>
+CLOUDINARY_API_SECRET=<your-cloudinary-secret>
+BREVO_API_KEY=<your-brevo-key>
+BREVO_FROM_EMAIL=<your-email>
+ADMIN_EMAIL=<your-admin-email>
+```
+
+### ⚠️ Important Note About MediaPipe
+
+**MediaPipe is NOT compatible with Render's free tier environment.** 
+
+For production deployment on Render, you have these options:
+
+1. **Remove pose detection temporarily** - Deploy without MediaPipe, add it later
+2. **Use alternative platforms**:
+   - **Railway** (supports Python binary dependencies)
+   - **Google Cloud Run** (supports Docker with MediaPipe)
+   - **AWS EC2** (full control over environment)
+3. **Use TensorFlow Lite or ONNX Runtime** - Lighter alternatives to MediaPipe
+
+**For now**: The app will deploy successfully but pose extraction endpoint will fail. All other features (user auth, images, backups, email) work perfectly!
+
+---
+
 ## 🤝 Contributing
 
 1. Fork the repository
